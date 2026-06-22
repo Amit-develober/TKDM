@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taekwondo Academy - Premium Taekwondo Academy Management System</title>
+  
+  <!-- Global Error Boundary for Diagnostics -->
+  <script>
+    window.addEventListener('error', function(e) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.position = 'fixed';
+      errorDiv.style.top = '0';
+      errorDiv.style.left = '0';
+      errorDiv.style.width = '100%';
+      errorDiv.style.background = '#ff1744';
+      errorDiv.style.color = '#ffffff';
+      errorDiv.style.padding = '1.5rem';
+      errorDiv.style.zIndex = '10000';
+      errorDiv.style.fontFamily = 'monospace';
+      errorDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
+      errorDiv.innerHTML = '<h3 style="margin-bottom:0.5rem;">🚨 Application JavaScript Error</h3>' +
+                            '<p><strong>Message:</strong> ' + e.message + '</p>' +
+                            '<p><strong>File:</strong> ' + e.filename + ':' + e.lineno + ':' + e.colno + '</p>' +
+                            '<p style="margin-top:0.5rem;font-size:0.8rem;color:rgba(255,255,255,0.8);">Please capture this screen or share the error details.</p>';
+      document.body.appendChild(errorDiv);
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.position = 'fixed';
+      errorDiv.style.top = '0';
+      errorDiv.style.left = '0';
+      errorDiv.style.width = '100%';
+      errorDiv.style.background = '#ff1744';
+      errorDiv.style.color = '#ffffff';
+      errorDiv.style.padding = '1.5rem';
+      errorDiv.style.zIndex = '10000';
+      errorDiv.style.fontFamily = 'monospace';
+      errorDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
+      errorDiv.innerHTML = '<h3 style="margin-bottom:0.5rem;">🚨 Application Promise Rejection</h3>' +
+                            '<p><strong>Reason:</strong> ' + (e.reason ? (e.reason.message || e.reason) : 'Unknown') + '</p>' +
+                            '<p style="margin-top:0.5rem;font-size:0.8rem;color:rgba(255,255,255,0.8);">Please capture this screen or share the error details.</p>';
+      document.body.appendChild(errorDiv);
+    });
+  </script>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="A premium SPA and PWA Taekwondo Academy Management System to streamline member enrollment, attendance tracking, and monthly expense calculations with Firebase backend.">
+  <meta name="theme-color" content="#060b16">
+  
+  <!-- Web App Manifest for PWA -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/logo.png">
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="index.css">
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- ==================== AUTHENTICATION SCREEN ==================== -->
+  <div id="auth-screen" class="auth-wrapper" style="display: none;">
+    <div class="card-panel auth-card">
+      <div class="auth-header">
+        <div class="auth-logo">
+          <img src="assets/logo.png" alt="Logo" class="logo-img" style="width: 48px; height: 48px;">
+        </div>
+        <h2 id="auth-title" class="auth-title">Welcome to ApexTaekwondo Academy</h2>
+        <p id="auth-subtitle" class="auth-subtitle">Login to access your Taekwondo Academy operations dashboard</p>
+      </div>
+      
+      <form id="auth-form">
+        <div class="form-group">
+          <label class="form-label" for="auth-email">Email Address</label>
+          <input class="form-input" type="email" id="auth-email" placeholder="admin@taekwondoacademy.com" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="auth-password">Password</label>
+          <input class="form-input" type="password" id="auth-password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        
+        <button class="btn btn-primary" type="submit" style="width: 100%; margin-top: 1rem;" id="auth-submit-btn">
+          Login
+        </button>
+      </form>
+      
+      <div style="text-align: center; margin-top: 1.5rem; font-size: 0.875rem;">
+        <span id="auth-switch-text">Don't have an admin account?</span>
+        <a id="auth-switch-link" class="auth-toggle-link">Register Here</a>
+      </div>
+
+      <div style="display: flex; align-items: center; margin: 1.25rem 0; color: var(--text-secondary);">
+        <hr style="flex-grow: 1; border: none; border-top: 1px solid var(--border-light); margin-right: 1rem;">
+        <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">OR</span>
+        <hr style="flex-grow: 1; border: none; border-top: 1px solid var(--border-light); margin-left: 1rem;">
+      </div>
+
+      <button class="btn btn-secondary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.75rem;" id="btn-google-login" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6 l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19 C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.5 24c0-1.55-.15-3.24-.47-4.75H24v9h12.75 c-.53 2.87-2.14 5.3-4.59 6.94l7.15 5.53C43.48 36.56 46.5 30.82 46.5 24z"/>
+          <path fill="#FBBC05" d="M10.54 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59 l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.98-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.15-5.53 c-2.1 1.41-4.76 2.24-8.74 2.24-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        Sign in with Google
+      </button>
+      
+
+    </div>
+  </div>
+
+  <!-- ==================== MAIN SPA APPLICATION LAYOUT ==================== -->
+  <div id="app-screen" class="app-container" style="display: none;">
+    
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo-section" style="justify-content: space-between; align-items: center; width: 100%;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <img src="assets/logo.png" alt="Logo" class="logo-img">
+          <div>
+            <h1 class="logo-text" id="header-gym-name">ApexTaekwondo Academy</h1>
+            <span class="logo-tagline">Management</span>
+          </div>
+        </div>
+        <button class="icon-btn mobile-close-btn" id="btn-close-sidebar">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      
+      <nav class="nav-links">
+        <li class="nav-item active" data-target="dashboard">
+          <a href="#dashboard"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+        </li>
+        <li class="nav-item" data-target="attendance">
+          <a href="#attendance"><i data-lucide="check-square"></i> Attendance</a>
+        </li>
+        <li class="nav-item" data-target="enroll">
+          <a href="#enroll"><i data-lucide="user-plus"></i> Enroll Member</a>
+        </li>
+        <li class="nav-item" data-target="belts">
+          <a href="#belts"><i data-lucide="award"></i> Belt Dashboard</a>
+        </li>
+        <li class="nav-item" data-target="expenses">
+          <a href="#expenses"><i data-lucide="wallet"></i> Expenses</a>
+        </li>
+        <li class="nav-item" data-target="settings">
+          <a href="#settings"><i data-lucide="settings"></i> Settings</a>
+        </li>
+        <li class="nav-item" data-target="about">
+          <a href="#about"><i data-lucide="info"></i> About</a>
+        </li>
+      </nav>
+      
+      <div class="user-profile-section">
+        <div class="user-info">
+          <div class="avatar" id="sidebar-avatar">A</div>
+          <div class="user-details">
+            <div class="user-name" id="sidebar-username">Admin</div>
+            <div class="user-role" id="sidebar-userrole">Taekwondo Academy Operator</div>
+          </div>
+        </div>
+        <button class="btn-logout" id="btn-logout-desktop">
+          <i data-lucide="log-out" style="width:16px;height:16px;"></i> Log Out
+        </button>
+      </div>
+    </aside>
+
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- MOBILE TOP HEADER -->
+    <header class="mobile-header">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button class="icon-btn" id="btn-hamburger" style="display: flex; align-items: center; justify-content: center;">
+          <i data-lucide="menu"></i>
+        </button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <img src="assets/logo.png" alt="Logo" class="logo-img" style="width: 32px; height: 32px;">
+          <span class="logo-text" id="mobile-header-gym-name" style="font-size: 1.1rem;">ApexTaekwondo Academy</span>
+        </div>
+      </div>
+      <button class="icon-btn" id="btn-logout-mobile">
+        <i data-lucide="log-out"></i>
+      </button>
+    </header>
+
+
+
+    <!-- MAIN VIEWS WRAPPER -->
+    <main class="main-content">
+      
+      <!-- Demo Mode warning banner if Firebase is bypassed -->
+      <div id="demo-banner" class="notification-banner" style="display: none;">
+        <div class="banner-content">
+          <i data-lucide="alert-triangle" style="color: var(--accent-yellow);"></i>
+          <span>Running in <strong>Local Demo Mode</strong>. Data is stored on your device. Set Firebase credentials in <code>js/firebase-config.js</code> to enable remote syncing.</span>
+        </div>
+      </div>
+
+      <!-- Offline Mode banner -->
+      <div id="offline-banner" class="notification-banner" style="display: none; background: rgba(255,23,68,0.06); border-color: rgba(255,23,68,0.15)">
+        <div class="banner-content">
+          <i data-lucide="wifi-off" style="color: var(--accent-red);"></i>
+          <span>You are currently <strong>offline</strong>. Taekwondo Academy operations will sync when network is restored.</span>
+        </div>
+      </div>
+
+      <!-- ==================== VIEW: DASHBOARD ==================== -->
+      <section id="view-dashboard" class="page-section active">
+        <div class="section-header">
+          <h2 class="section-title">Dashboard Overview</h2>
+          <p class="section-subtitle">Real-time indicators and metrics for your Taekwondo Academy</p>
+        </div>
+        
+        <!-- Stats Row -->
+        <div class="stats-grid">
+          <!-- Total Students -->
+          <div class="stat-card" style="--card-accent: var(--accent-cyan); --card-icon-bg: rgba(0, 242, 254, 0.08);">
+            <div class="stat-icon"><i data-lucide="users"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">Total Members</span>
+              <span class="stat-value" id="stat-total-students">0</span>
+            </div>
+          </div>
+          
+          <!-- Today Attendance -->
+          <div class="stat-card" style="--card-accent: var(--accent-green); --card-icon-bg: rgba(0, 230, 118, 0.08);">
+            <div class="stat-icon"><i data-lucide="calendar"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">Today's Check-ins</span>
+              <span class="stat-value" id="stat-today-attendance">0</span>
+            </div>
+          </div>
+          
+          <!-- Pending Fees (Clickable) -->
+          <div class="stat-card clickable" id="card-pending-fees" style="--card-accent: var(--accent-yellow); --card-icon-bg: rgba(255, 214, 0, 0.08);">
+            <div class="stat-icon"><i data-lucide="alert-circle"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">Pending Fees</span>
+              <span class="stat-value" id="stat-pending-fees">0</span>
+            </div>
+          </div>
+          
+          <!-- Expiring Soon (Clickable) -->
+          <div class="stat-card clickable" id="card-expiring-soon" style="--card-accent: var(--accent-purple); --card-icon-bg: rgba(245, 120, 139, 0.08);">
+            <div class="stat-icon"><i data-lucide="clock"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">Expiring Soon</span>
+              <span class="stat-value" id="stat-expiring-soon">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profit/Loss Financial Row -->
+        <div class="stats-grid">
+          <!-- Month Expenses -->
+          <div class="stat-card" style="--card-accent: var(--accent-red); --card-icon-bg: rgba(255, 23, 68, 0.08);">
+            <div class="stat-icon"><i data-lucide="arrow-up-right"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">This Month Expenses</span>
+              <span class="stat-value" id="stat-month-expenses">$0.00</span>
+            </div>
+          </div>
+          
+          <!-- Month Profit -->
+          <div class="stat-card" style="--card-accent: var(--accent-green); --card-icon-bg: rgba(0, 230, 118, 0.08);">
+            <div class="stat-icon"><i data-lucide="trending-up"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">This Month Profit</span>
+              <span class="stat-value" id="stat-month-profit">$0.00</span>
+            </div>
+          </div>
+          
+          <!-- Month Loss -->
+          <div class="stat-card" style="--card-accent: var(--accent-red); --card-icon-bg: rgba(255, 23, 68, 0.08);">
+            <div class="stat-icon"><i data-lucide="trending-down"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">This Month Loss</span>
+              <span class="stat-value" id="stat-month-loss">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Financial Summary charts / list side by side -->
+        <div class="dashboard-tables-grid">
+          <!-- Recent Renewals / Income -->
+          <div class="card-panel">
+            <h3 style="margin-bottom: 1.25rem; font-family: var(--font-display); font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="arrow-down-left" style="color: var(--accent-green);"></i> Recent Payments (Fees)
+            </h3>
+            <div class="table-container" style="max-height: 250px;">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Member</th>
+                    <th>Date</th>
+                    <th>Method</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-recent-payments">
+                  <tr>
+                    <td colspan="4" style="text-align: center; color: var(--text-muted);">No recent payments</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Recent Expenses -->
+          <div class="card-panel">
+            <h3 style="margin-bottom: 1.25rem; font-family: var(--font-display); font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="arrow-up-right" style="color: var(--accent-red);"></i> Recent Expenses
+            </h3>
+            <div class="table-container" style="max-height: 250px;">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Expense Type</th>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-recent-expenses">
+                  <tr>
+                    <td colspan="4" style="text-align: center; color: var(--text-muted);">No recent expenses</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW: ATTENDANCE ==================== -->
+      <section id="view-attendance" class="page-section">
+        <div class="section-header">
+          <h2 class="section-title">Today's Attendance</h2>
+          <p class="section-subtitle" id="attendance-date-display">Date: Sunday, June 14, 2026</p>
+        </div>
+        
+        <div class="card-panel">
+          <div class="search-bar-wrapper">
+            <input type="text" id="attendance-search" class="form-input search-input" placeholder="Search members by name or mobile...">
+          </div>
+          
+          <div class="table-container">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Member Name</th>
+                  <th>Mobile No.</th>
+                  <th>Membership Status</th>
+                  <th>Expiration Date</th>
+                  <th style="text-align: right;">Mark Attendance</th>
+                </tr>
+              </thead>
+              <tbody id="attendance-member-list">
+                <tr>
+                  <td colspan="5" style="text-align: center; color: var(--text-muted);">Loading members list...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW: ENROLL ==================== -->
+      <section id="view-enroll" class="page-section">
+        <div class="section-header">
+          <h2 class="section-title">New Member Registration</h2>
+          <p class="section-subtitle">Enroll a new member into the Taekwondo Academy database</p>
+        </div>
+        
+        <div class="card-panel" style="max-width: 800px; margin: 0 auto;">
+          <form id="enroll-form">
+            <div class="form-grid">
+              <!-- Name -->
+              <div class="form-group">
+                <label class="form-label" for="enroll-name">Full Name</label>
+                <input class="form-input" type="text" id="enroll-name" placeholder="John Doe" required autocomplete="name">
+              </div>
+              
+              <!-- Mobile -->
+              <div class="form-group">
+                <label class="form-label" for="enroll-mobile">Mobile Number</label>
+                <input class="form-input" type="tel" id="enroll-mobile" placeholder="Enter Mob No." required autocomplete="tel">
+              </div>
+              
+              <!-- Date of Enrollment -->
+              <div class="form-group">
+                <label class="form-label" for="enroll-date">Enrollment Date</label>
+                <input class="form-input" type="date" id="enroll-date" required>
+              </div>
+              
+              <!-- Membership Duration -->
+              <div class="form-group">
+                <label class="form-label" for="enroll-membership">Membership Duration</label>
+                <select class="form-select" id="enroll-membership" required>
+                  <option value="1">1 Month (30 Days)</option>
+                  <option value="3">3 Months (90 Days)</option>
+                  <option value="6">6 Months (180 Days)</option>
+                  <option value="12">1 Year (365 Days)</option>
+                </select>
+              </div>
+
+              <!-- Initial Fee Amount -->
+              <div class="form-group">
+                <label class="form-label" for="enroll-fee">Membership Fee (<span class="currency-label-symbol">$</span>)</label>
+                <input class="form-input" type="number" id="enroll-fee" placeholder="1000" min="0" required>
+              </div>
+
+              <!-- Membership Expiry Date -->
+              <div class="form-group">
+                <label class="form-label" for="enroll-expiry">Expiry Date (After Payment)</label>
+                <input class="form-input" type="date" id="enroll-expiry" readonly style="background: rgba(15, 23, 42, 0.02); cursor: not-allowed;">
+              </div>
+
+              <!-- Belt Rank -->
+              <div class="form-group">
+                <label class="form-label" for="enroll-belt">Belt Rank</label>
+                <select class="form-select" id="enroll-belt" required>
+                  <option value="White Belt" selected>White Belt</option>
+                  <option value="White Belt with Yellow Stripe">White Belt with Yellow Stripe</option>
+                  <option value="Yellow Belt">Yellow Belt</option>
+                  <option value="Yellow Belt with Green Stripe">Yellow Belt with Green Stripe</option>
+                  <option value="Green Belt">Green Belt</option>
+                  <option value="Green Belt with Blue Stripe (Higher Green)">Green Belt with Blue Stripe (Higher Green)</option>
+                  <option value="Blue Belt">Blue Belt</option>
+                  <option value="Blue Belt with Red Stripe">Blue Belt with Red Stripe</option>
+                  <option value="Red Belt">Red Belt</option>
+                  <option value="Red Belt with Black Stripe">Red Belt with Black Stripe</option>
+                  <option value="Black Belt (1st Dan)">Black Belt (1st Dan)</option>
+                  <option value="Black Belt (2nd Dan)">Black Belt (2nd Dan)</option>
+                  <option value="Black Belt (3rd Dan)">Black Belt (3rd Dan)</option>
+                  <option value="Black Belt (4th Dan)">Black Belt (4th Dan)</option>
+                  <option value="Black Belt (5th Dan)">Black Belt (5th Dan)</option>
+                  <option value="Black Belt (6th Dan)">Black Belt (6th Dan)</option>
+                  <option value="Black Belt (7th Dan)">Black Belt (7th Dan)</option>
+                  <option value="Black Belt (8th Dan)">Black Belt (8th Dan)</option>
+                  <option value="Black Belt (9th Dan)">Black Belt (9th Dan)</option>
+                </select>
+              </div>
+
+              <!-- Payment Status -->
+              <div class="form-group">
+                <label class="form-label" for="enroll-status">Payment Status</label>
+                <select class="form-select" id="enroll-status" required>
+                  <option value="Paid">Paid</option>
+                  <option value="Unpaid">Unpaid</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button class="btn btn-secondary" type="reset">Reset Form</button>
+              <button class="btn btn-primary" type="submit"><i data-lucide="check"></i> Register & Pay</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Member Directory Section -->
+        <div class="card-panel" style="max-width: 800px; margin: 2rem auto 0 auto;">
+          <h3 style="margin-bottom: 1.5rem; font-family: var(--font-display); font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="users" style="color: var(--accent-cyan);"></i> Member Directory
+          </h3>
+          
+          <div class="search-bar-wrapper" style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+            <input type="text" id="enroll-student-search" class="form-input search-input" placeholder="Search members by name or mobile..." style="flex-grow: 1;">
+            <select id="enroll-student-status-filter" class="form-select" style="max-width: 200px;">
+              <option value="active">Active Members</option>
+              <option value="all">All Members</option>
+              <option value="out">Out Members</option>
+            </select>
+          </div>
+
+          <div class="table-container">
+            <table class="custom-table" id="enroll-student-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Mobile</th>
+                  <th>Belt</th>
+                  <th>Enrollment Date</th>
+                  <th>Duration</th>
+                  <th>Expiry Date</th>
+                  <th>Attendance rate</th>
+                  <th>Payment</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="enroll-student-list">
+                <tr>
+                  <td colspan="10" style="text-align: center; color: var(--text-muted);">Loading members list...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW: EXPENSES ==================== -->
+      <section id="view-expenses" class="page-section">
+        <div class="section-header">
+          <h2 class="section-title">Expense Management</h2>
+          <p class="section-subtitle">Track rent, maintenance, utility bills, and other Taekwondo Academy expenses</p>
+        </div>
+        
+        <div class="expenses-grid">
+          <!-- Log Expense Form -->
+          <div class="card-panel">
+            <h3 style="margin-bottom: 1.5rem; font-family: var(--font-display); font-size: 1.25rem;">Log Taekwondo Academy Expense</h3>
+            <form id="expense-form">
+              <div class="form-group">
+                <label class="form-label" for="expense-date">Expense Date</label>
+                <input class="form-input" type="date" id="expense-date" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="expense-amount">Amount (<span class="currency-label-symbol">$</span>)</label>
+                <input class="form-input" type="number" id="expense-amount" placeholder="500" min="0.01" step="any" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="expense-category">Category</label>
+                <select class="form-select" id="expense-category" required>
+                  <option value="Electricity">Electricity Bill</option>
+                  <option value="Maintenance">Maintenance & Repairs</option>
+                  <option value="Rent">Taekwondo Academy Space Rent</option>
+                  <option value="Salary">Staff Salaries</option>
+                  <option value="Equipment">New Taekwondo Academy Equipment</option>
+                  <option value="Marketing">Advertising & Marketing</option>
+                  <option value="Water/Internet">Water / Internet Bill</option>
+                  <option value="Other">Other Expenses</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="expense-desc">Description (Optional)</label>
+                <textarea class="form-textarea" id="expense-desc" placeholder="Details about this purchase..." rows="3"></textarea>
+              </div>
+              
+              <button class="btn btn-primary" type="submit" style="width: 100%; margin-top: 0.5rem;">
+                <i data-lucide="plus"></i> Add Expense
+              </button>
+            </form>
+          </div>
+
+          <!-- Expenses Log List -->
+          <div class="card-panel">
+            <h3 style="margin-bottom: 1.5rem; font-family: var(--font-display); font-size: 1.25rem;">Expense History</h3>
+            <div class="table-container">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th style="text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="expenses-list">
+                  <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted);">No expenses logged yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW: BELT DASHBOARD ==================== -->
+      <section id="view-belts" class="page-section">
+        <div class="section-header">
+          <h2 class="section-title">Belt Dashboard</h2>
+          <p class="section-subtitle">Distribution of active students across different belt ranks</p>
+        </div>
+        
+        <div class="stats-grid" id="belt-cards-grid">
+          <!-- Belt cards will be injected dynamically here -->
+        </div>
+      </section>
+
+      <!-- ==================== VIEW: SETTINGS ==================== -->
+      <section id="view-settings" class="page-section">
+        <div class="section-header">
+          <h2 class="section-title">Settings</h2>
+          <p class="section-subtitle">Configure system options, currency settings, and manage database records</p>
+        </div>
+        
+        <div class="settings-grid">
+          <!-- General Settings (Currency) -->
+          <div class="card-panel">
+            <h3 style="margin-bottom: 1.5rem; font-family: var(--font-display); font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="coins" style="color: var(--accent-cyan);"></i> General Configuration
+            </h3>
+            <form id="settings-form">
+              <div class="form-group">
+                <label class="form-label" for="settings-currency">System Currency</label>
+                <select class="form-select" id="settings-currency" required>
+                  <option value="$">USD - Dollar ($)</option>
+                  <option value="₹">INR - Rupee (₹)</option>
+                  <option value="€">EUR - Euro (€)</option>
+                  <option value="£">GBP - Pound (£)</option>
+                  <option value="¥">JPY/CNY - Yen/Yuan (¥)</option>
+                  <option value="د.إ">AED - Dirham (د.إ)</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" type="submit" style="width: 100%; margin-top: 0.5rem;">
+                Save Configuration
+              </button>
+            </form>
+          </div>
+
+          <!-- Danger Zone (Reset Database) -->
+          <div class="card-panel" style="border-color: rgba(255, 23, 68, 0.25);">
+            <h3 style="margin-bottom: 1.5rem; font-family: var(--font-display); font-size: 1.25rem; color: var(--accent-red); display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="alert-triangle"></i> Danger Zone
+            </h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;">
+              Resetting the database will permanently delete all Taekwondo Academy members, attendance check-ins, payments, expenses, and configuration details. This action is irreversible.
+            </p>
+            <button class="btn btn-danger" id="btn-reset-database" style="width: 100%;">
+              <i data-lucide="trash-2"></i> Reset Taekwondo Academy Database
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW: ABOUT ==================== -->
+      <section id="view-about" class="page-section">
+        <div class="section-header">
+          <h2 class="section-title">About Taekwondo Academy System</h2>
+          <p class="section-subtitle">Technical specifications and information</p>
+        </div>
+        
+        <div class="card-panel">
+          <h3 id="about-gym-title" style="margin-bottom: 0.5rem; font-family: var(--font-display); font-size: 1.35rem; color: var(--accent-cyan);">ApexTaekwondo Academy Manager v1.0.0</h3>
+          <p id="about-gym-address" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; font-style: italic;"></p>
+          <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem;">
+            A state-of-the-art Single Page Application (SPA) designed to enable Taekwondo Academy operators to manage memberships, attendance sheets, and financial margins offline and online. Features instant responsive tracking and fully conforms to PWA standards for homescreen installation and lightning-fast loading speeds.
+          </p>
+
+          <h4 style="margin-bottom: 1rem; font-family: var(--font-display); font-size: 1.1rem;">Features Highlight</h4>
+          <div class="about-features">
+            <div class="feature-item">
+              <span class="feature-title"><i data-lucide="zap" style="width:16px;height:16px;vertical-align:text-bottom;"></i> SPA Routing</span>
+              <span class="feature-desc">Frictionless hash routing ensures views swap instantly with custom visual transitions and zero browser reload lag.</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-title"><i data-lucide="shield" style="width:16px;height:16px;vertical-align:text-bottom;"></i> Firebase Backend</span>
+              <span class="feature-desc">Syncs automatically with Cloud Firestore and Firebase Authentication if config is present.</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-title"><i data-lucide="hard-drive" style="width:16px;height:16px;vertical-align:text-bottom;"></i> Smart Fallback</span>
+              <span class="feature-desc">No database credentials? No problem! The system shifts database calls to LocalStorage dynamically.</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-title"><i data-lucide="smartphone" style="width:16px;height:16px;vertical-align:text-bottom;"></i> Mobile PWA</span>
+              <span class="feature-desc">Fully installable on smartphones and tablets. Offers offline database queries and cached asset assets.</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 2.5rem; padding: 1.5rem; border-radius: 12px; background: rgba(0, 242, 254, 0.04); border: 1px solid var(--border-light);">
+            <h4 style="font-family: var(--font-display); margin-bottom: 0.5rem; color: var(--accent-cyan);">Connecting Your Firebase Project</h4>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">
+              To connect this application to your personal remote database, update the configuration block inside:
+            </p>
+            <code style="display: block; padding: 0.75rem; background: rgba(0,0,0,0.4); border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: var(--accent-purple); border: 1px solid var(--border-light);">
+              // file: js/firebase-config.js<br>
+              const firebaseConfig = {<br>
+              &nbsp;&nbsp;apiKey: "YOUR_FIREBASE_API_KEY",<br>
+              &nbsp;&nbsp;authDomain: "YOUR_PROJECT_ID.firebaseapp.com",<br>
+              &nbsp;&nbsp;projectId: "YOUR_PROJECT_ID",<br>
+              &nbsp;&nbsp;...<br>
+              };
+            </code>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==================== POPUP: PENDING FEES LIST ==================== -->
+  <div id="pending-fees-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Unpaid Members & Renewals</h3>
+        <button class="modal-close" id="btn-close-pending-modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Renewal Drawer / Form (Shows only when clicking Mark As Paid on a student row) -->
+        <div id="renewal-drawer" class="card-panel" style="display: none; border-color: var(--accent-cyan); margin-bottom: 1.5rem; padding: 1.25rem;">
+          <h4 style="margin-bottom: 1rem; font-family: var(--font-display); color: var(--accent-cyan); font-size: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <span>Renew Membership: <strong id="renew-student-name">Student</strong></span>
+            <button class="icon-btn" id="btn-cancel-renewal" style="color: var(--accent-red); font-size: 0.75rem; display: flex; align-items: center; gap: 4px;">
+              <i data-lucide="x" style="width:12px;height:12px;"></i> Cancel
+            </button>
+          </h4>
+          
+          <form id="renewal-form">
+            <input type="hidden" id="renew-student-id">
+            <input type="hidden" id="renew-original-fee">
+            
+            <div class="renewal-form-grid">
+              <div class="form-group">
+                <label class="form-label" for="renew-date">Payment Date</label>
+                <input class="form-input" type="date" id="renew-date" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="renew-method">Payment Method</label>
+                <select class="form-select" id="renew-method" required>
+                  <option value="UPI">UPI</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Card">Card</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="renew-months">Duration</label>
+                <select class="form-select" id="renew-months" required>
+                  <option value="1">1 Month (30 Days)</option>
+                  <option value="3">3 Months (90 Days)</option>
+                  <option value="6">6 Months (180 Days)</option>
+                  <option value="12">1 Year (365 Days)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="renew-amount">Fee Collected (<span class="currency-label-symbol">$</span>)</label>
+                <input class="form-input" type="number" id="renew-amount" min="0" required>
+              </div>
+            </div>
+            
+            <button class="btn btn-primary" type="submit" style="width: 100%; margin-top: 1rem; font-size: 0.9rem;">
+              Confirm Renewal Payment
+            </button>
+          </form>
+        </div>
+
+        <!-- Expired Members Table -->
+        <div class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Mobile</th>
+                <th>Expired Since</th>
+                <th>Days Unpaid</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="unpaid-members-list">
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted);">No pending fees! Excellent.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-close-pending-modal-footer">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== POPUP: EXPIRING SOON LIST ==================== -->
+  <div id="expiring-soon-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Members Expiring Soon (7 Days)</h3>
+        <button class="modal-close" id="btn-close-expiring-modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Extension Drawer / Form (Shows inline when clicking Extend Membership) -->
+        <div id="extension-drawer" class="card-panel" style="display: none; border-color: var(--accent-purple); margin-bottom: 1.5rem; padding: 1.25rem;">
+          <h4 style="margin-bottom: 1rem; font-family: var(--font-display); color: var(--accent-purple); font-size: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <span>Extend Membership: <strong id="extend-student-name">Student</strong></span>
+            <button class="icon-btn" id="btn-cancel-extension" style="color: var(--accent-red); font-size: 0.75rem; display: flex; align-items: center; gap: 4px;">
+              <i data-lucide="x" style="width:12px;height:12px;"></i> Cancel
+            </button>
+          </h4>
+          
+          <form id="extension-form">
+            <input type="hidden" id="extend-student-id">
+            <input type="hidden" id="extend-original-fee">
+            
+            <div class="renewal-form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label" for="extend-date">Payment Date</label>
+                <input class="form-input" type="date" id="extend-date" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="extend-method">Payment Method</label>
+                <select class="form-select" id="extend-method" required>
+                  <option value="UPI">UPI</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Card">Card</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="extend-months">Duration</label>
+                <select class="form-select" id="extend-months" required>
+                  <option value="1">1 Month (30 Days)</option>
+                  <option value="3">3 Months (90 Days)</option>
+                  <option value="6">6 Months (180 Days)</option>
+                  <option value="12">1 Year (365 Days)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="extend-amount">Fee Collected (<span class="currency-label-symbol">$</span>)</label>
+                <input class="form-input" type="number" id="extend-amount" min="0" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="extend-status">Payment Status</label>
+                <select class="form-select" id="extend-status" required>
+                  <option value="Paid">Paid</option>
+                  <option value="Unpaid">Unpaid</option>
+                </select>
+              </div>
+            </div>
+            
+            <button class="btn btn-primary" type="submit" style="width: 100%; margin-top: 1rem; font-size: 0.9rem;">
+              Confirm Extension
+            </button>
+          </form>
+        </div>
+
+        <!-- Expiring Members Table -->
+        <div class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Mobile</th>
+                <th>Expiry Date</th>
+                <th>Days Left</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="expiring-members-list">
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No memberships expiring soon.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-close-expiring-modal-footer">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== POPUP: BELT STUDENTS LIST ==================== -->
+  <div id="belt-students-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="belt-modal-title">Students list</h3>
+        <button class="modal-close" id="btn-close-belt-modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Mobile</th>
+                <th>Belt</th>
+              </tr>
+            </thead>
+            <tbody id="belt-students-list">
+              <tr>
+                <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No students in this rank.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-close-belt-modal-footer">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== POPUP: TAEKWONDO ACADEMY ONBOARDING ==================== -->
+  <div id="onboarding-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Configure Taekwondo Academy Profile</h3>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;">
+          Welcome! Before accessing the dashboard, please configure your Taekwondo Academy details. These details are used to personalize headers and reports.
+        </p>
+        <form id="onboarding-form">
+          <div class="form-group">
+            <label class="form-label" for="onboard-gym-name">Taekwondo Academy Name</label>
+            <input class="form-input" type="text" id="onboard-gym-name" placeholder="Iron Forge Taekwondo Academy" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="onboard-gym-address">Address</label>
+            <input class="form-input" type="text" id="onboard-gym-address" placeholder="Enter Address" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="onboard-gym-phone">Contact Number</label>
+            <input class="form-input" type="tel" id="onboard-gym-phone" placeholder="Enter Mob No." required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="onboard-gym-owner">Owner Name</label>
+            <input class="form-input" type="text" id="onboard-gym-owner" placeholder="John Doe" required>
+          </div>
+          
+          <button class="btn btn-primary" type="submit" style="width: 100%; margin-top: 1rem;">
+            Save & Continue
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main JS Logic (type="module") -->
+  <script type="module" src="js/app.js"></script>
+  
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then((reg) => console.log('Service Worker Registered successfully.', reg.scope))
+          .catch((err) => console.error('Service Worker registration failed.', err));
+      });
+    }
+  </script>
+</body>
+</html>
