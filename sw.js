@@ -1,5 +1,5 @@
-// ApexTaekwondo PWA Service Worker
-const CACHE_NAME = "apextaekwondo-cache-v1";
+// Taekwondo Academy PWA Service Worker
+const CACHE_NAME = "taekwondoacademy-cache-v1";
 const ASSETS = [
   "./",
   "./index.html",

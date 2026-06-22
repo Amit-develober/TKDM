@@ -1,4 +1,4 @@
-// ApexTaekwondo Academy - Single Page Application Core Controller
+// Taekwondo Academy - Single Page Application Core Controller
 import { authAPI } from "./auth.js";
 import { dbAPI } from "./db.js";
 import { isFirebaseConnected } from "./firebase-config.js";
@@ -194,12 +194,12 @@ const setupAuthListeners = () => {
     isSignupMode = !isSignupMode;
     if (isSignupMode) {
       authTitle.innerText = "Register Admin";
-      authSubtitle.innerText = "Create a new operator account for ApexTaekwondo Academy";
+      authSubtitle.innerText = "Create a new operator account for Taekwondo Academy";
       authSubmitBtn.innerText = "Register";
       authSwitchText.innerText = "Already have an account?";
       authSwitchLink.innerText = "Login Here";
     } else {
-      authTitle.innerText = "Welcome to ApexTaekwondo Academy";
+      authTitle.innerText = "Welcome to Taekwondo Academy";
       authSubtitle.innerText = "Login to access your Taekwondo Academy operations dashboard";
       authSubmitBtn.innerText = "Login";
       authSwitchText.innerText = "Don't have an admin account?";
@@ -1265,7 +1265,7 @@ const checkGymProfileOnboarding = async () => {
       onboardingModal.classList.remove("active");
       
       // Apply gym configuration dynamically to DOM
-      const gymName = profile.gymName || "ApexTaekwondo Academy";
+      const gymName = profile.gymName || "Taekwondo Academy";
       const gymAddress = profile.address || "";
       const ownerName = profile.ownerName || "";
       
@@ -1462,7 +1462,7 @@ window.addEventListener("db-update", (e) => {
     }
   } else if (type === "gymProfile") {
     if (data) {
-      const gymName = data.gymName || "ApexTaekwondo Academy";
+      const gymName = data.gymName || "Taekwondo Academy";
       const gymAddress = data.address || "";
       const ownerName = data.ownerName || "";
       

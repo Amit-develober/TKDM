@@ -1,6 +1,6 @@
 {
-  "name": "ApexTaekwondo Academy Management System",
-  "short_name": "ApexTaekwondo",
+  "name": "Taekwondo Academy Management System",
+  "short_name": "Taekwondo Academy",
   "description": "A premium Single Page Application and Progressive Web App for managing members, attendance sheet, and expenses of Taekwondo Academy operations.",
   "start_url": "./index.html",
   "display": "standalone",

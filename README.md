@@ -1,6 +1,6 @@
-# ApexTaekwondo Academy — Premium Taekwondo Academy Management System
+# Taekwondo Academy — Premium Taekwondo Academy Management System
 
-ApexTaekwondo Academy is a state-of-the-art Single Page Application (SPA) and Progressive Web App (PWA) designed for modern Taekwondo Academy operators. It streamlines student enrollment, daily attendance check-ins, monthly expense tracking, and business metrics dashboards. Built with a premium, high-fidelity dark-mode interface, it operates seamlessly both online (with Firebase backend syncing) and offline (using localized storage fallback).
+Taekwondo Academy is a state-of-the-art Single Page Application (SPA) and Progressive Web App (PWA) designed for modern Taekwondo Academy operators. It streamlines student enrollment, daily attendance check-ins, monthly expense tracking, and business metrics dashboards. Built with a premium, high-fidelity dark-mode interface, it operates seamlessly both online (with Firebase backend syncing) and offline (using localized storage fallback).
 
 ## ✨ Features
 
