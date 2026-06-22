@@ -47,35 +47,53 @@ self.addEventListener("fetch", (e) => {
   // Only cache standard GET requests (e.g. bypass Firestore REST/Websocket calls)
   if (e.request.method !== "GET") return;
 
-  // Bypass Firebase Authentication and database domain requests
-  if (e.request.url.includes("googleapis.com") || e.request.url.includes("firebase")) {
+  const url = e.request.url;
+
+  // Bypass Firebase backend requests (Auth, Firestore, Analytics, etc.)
+  // but ALLOW Google Fonts (fonts.googleapis.com / fonts.gstatic.com) to be cached
+  const isFirebaseBackend =
+    url.includes("firestore.googleapis.com") ||
+    url.includes("identitytoolkit.googleapis.com") ||
+    url.includes("securetoken.googleapis.com") ||
+    url.includes("firebaseinstallations.googleapis.com") ||
+    url.includes("firebase.googleapis.com") ||
+    url.includes("firebasestorage.googleapis.com") ||
+    url.includes("www.gstatic.com/firebasejs");
+
+  if (isFirebaseBackend) {
     return;
   }
 
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
-      // Create a background fetch promise to update the cache
-      const fetchPromise = fetch(e.request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(e.request, responseToCache);
-            });
-          }
-          return networkResponse;
-        })
-        .catch(() => {
-          // Ignore background fetch errors (e.g., if offline)
-        });
-
-      // If cached response exists, return it immediately and let fetchPromise run in background
       if (cachedResponse) {
+        // Cache hit: return cached version immediately, update cache in background
+        fetch(e.request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const responseToCache = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(e.request, responseToCache);
+              });
+            }
+          })
+          .catch(() => {
+            // Silently ignore background revalidation errors (e.g., offline)
+          });
         return cachedResponse;
       }
 
-      // Otherwise, return the network request fetch promise
-      return fetchPromise;
+      // Cache miss: fetch from network and cache the response
+      return fetch(e.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      });
+      // If network also fails on a cache miss, the browser gets a natural network error
     })
   );
 });
