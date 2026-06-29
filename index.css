@@ -2,18 +2,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --bg-main: #faf7f2;
+  --bg-main: #f8fafc;
   --bg-card: #ffffff;
   --bg-input: #ffffff;
-  --accent-cyan: #FF6A1C;
-  --accent-purple: #F5788B;
-  --accent-gradient: linear-gradient(135deg, #FF6A1C 0%, #FFAE56 50%, #FFDA62 100%);
+  --accent-cyan: #1e3a8a;
+  --accent-purple: #6366f1;
+  --accent-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
   --accent-green: #10b981;
   --accent-red: #ef4444;
-  --accent-yellow: #FFDA62;
+  --accent-yellow: #60a5fa;
   
   --border-light: rgba(15, 23, 42, 0.08);
-  --border-focus: rgba(255, 106, 28, 0.4);
+  --border-focus: rgba(30, 58, 138, 0.4);
   
   --text-primary: #0f172a;
   --text-secondary: #475569;
@@ -23,7 +23,7 @@
   --font-display: 'Outfit', 'Inter', sans-serif;
   --font-body: 'Inter', sans-serif;
   
-  --shadow-neon: 0 8px 32px 0 rgba(255, 106, 28, 0.08);
+  --shadow-neon: 0 8px 32px 0 rgba(30, 58, 138, 0.08);
   --shadow-card: 0 8px 32px 0 rgba(15, 23, 42, 0.04);
   --transition-smooth: color 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -46,8 +46,8 @@ body {
   position: relative;
   /* Premium radial background glow */
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(245, 120, 139, 0.04) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(255, 174, 86, 0.04) 0%, transparent 40%);
+    radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.04) 0%, transparent 40%);
   background-attachment: fixed;
 }
 
@@ -106,7 +106,7 @@ body {
   justify-content: center;
   color: #fff;
   font-weight: 800;
-  box-shadow: 0 4px 12px rgba(255, 106, 28, 0.3);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
 }
 
 .logo-text {
@@ -114,7 +114,7 @@ body {
   font-weight: 700;
   font-size: 1.25rem;
   letter-spacing: 0.5px;
-  background: linear-gradient(135deg, #0f172a 0%, #FF6A1C 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -124,7 +124,7 @@ body {
   height: 40px;
   border-radius: 10px;
   object-fit: cover;
-  box-shadow: 0 4px 12px rgba(255, 106, 28, 0.2);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
 }
 
 .mobile-close-btn {
@@ -518,7 +518,7 @@ body {
 
 .form-input:focus, .form-select:focus, .form-textarea:focus {
   border-color: var(--accent-cyan);
-  box-shadow: 0 0 10px rgba(0, 242, 254, 0.15);
+  box-shadow: 0 0 10px rgba(30, 58, 138, 0.15);
 }
 
 .form-input::placeholder, .form-textarea::placeholder {
@@ -550,14 +550,14 @@ body {
 
 .btn-primary {
   background: var(--accent-gradient);
-  color: #000;
+  color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+  box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
+  box-shadow: 0 6px 20px rgba(30, 58, 138, 0.5);
 }
 
 .btn-secondary {
@@ -622,8 +622,8 @@ body {
 
 /* Compact button variant for table rows */
 .btn-sm {
-  padding: 0.4rem 0.85rem;
-  font-size: 0.78rem;
+  padding: 0.5rem 0.95rem;
+  font-size: 0.85rem;
   border-radius: 8px;
   white-space: nowrap;
 }
@@ -719,7 +719,7 @@ body {
 
 input:checked + .slider {
   background-color: var(--accent-cyan);
-  border-color: rgba(255, 106, 28, 0.3);
+  border-color: rgba(30, 58, 138, 0.3);
 }
 
 input:checked + .slider:before {

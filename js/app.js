@@ -20,12 +20,22 @@ const debounce = (func, delay = 100) => {
 };
 
 // --- CONSTANTS & HELPERS ---
-let currencySymbol = localStorage.getItem("taekwondo_currency") || "$";
+let currencySymbol = localStorage.getItem("taekwondo_currency") || "₹";
 
 const updateDOMCurrencySymbols = () => {
   document.querySelectorAll(".currency-label-symbol").forEach((el) => {
     el.innerText = currencySymbol;
   });
+};
+
+// Format phone number to international format for WhatsApp (defaults to 91 for 10-digit numbers)
+const formatWhatsAppNumber = (phone) => {
+  if (!phone) return "";
+  let cleaned = phone.replace(/\D/g, "");
+  if (cleaned.length === 10) {
+    cleaned = "91" + cleaned;
+  }
+  return cleaned;
 };
 
 // Format date to local readable format
@@ -1116,6 +1126,8 @@ const loadPendingFeesModal = async () => {
 
   tbody.innerHTML = unpaidStudents.map((s) => {
     const daysUnpaid = getDaysDiff(s.expiryDate, today);
+    const isExpired = s.expiryDate < today;
+    const message = `Hi ${s.name}, this is a gentle reminder regarding your Taekwondo Academy membership. Your fee of ${currencySymbol}${s.feeAmount || 1000} is pending, and your membership ${isExpired ? "has expired" : "is expiring soon"} on ${formatLocalDate(s.expiryDate)}. Please pay at your earliest convenience.`;
     return `
       <tr>
         <td style="font-weight: 600;">${s.name}</td>
@@ -1123,17 +1135,38 @@ const loadPendingFeesModal = async () => {
         <td style="color: #dc2626; font-weight: 500;">${formatLocalDate(s.expiryDate)}</td>
         <td><span style="color: #dc2626; font-weight: 600; white-space: nowrap;">Expired (${daysUnpaid} Day${daysUnpaid > 1 ? "s" : ""} Ago)</span></td>
         <td style="text-align: right;">
-          <button class="btn btn-primary btn-sm btn-renew-member" 
-            data-id="${s.id}" 
-            data-name="${s.name}" 
-            data-fee="${s.feeAmount || 1000}" 
-            data-months="${s.membershipMonths || 1}">
-            Mark Paid
-          </button>
+          <div style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
+            <button class="btn btn-secondary btn-sm btn-whatsapp-reminder" data-mobile="${formatWhatsAppNumber(s.mobile)}" data-message="${encodeURIComponent(message)}" style="padding: 0.35rem 0.65rem;" title="Send WhatsApp Reminder">
+              <i data-lucide="message-circle" style="width:14px;height:14px;color:#25D366;"></i>
+            </button>
+            <button class="btn btn-primary btn-sm btn-renew-member" 
+              data-id="${s.id}" 
+              data-name="${s.name}" 
+              data-fee="${s.feeAmount || 1000}" 
+              data-months="${s.membershipMonths || 1}">
+              Mark Paid
+            </button>
+          </div>
         </td>
       </tr>
     `;
   }).join("");
+
+  if (window.lucide) {
+    window.lucide.createIcons({ root: tbody });
+  }
+
+  // Bind WhatsApp confirmation
+  document.querySelectorAll(".btn-whatsapp-reminder").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      const mobile = e.currentTarget.getAttribute("data-mobile");
+      const text = decodeURIComponent(e.currentTarget.getAttribute("data-message"));
+      if (confirm(`Send WhatsApp reminder to this member?\n\nMessage:\n"${text}"`)) {
+        window.open(`https://wa.me/${mobile}?text=${encodeURIComponent(text)}`, "_blank");
+      }
+    };
+  });
 
   // Bind Renew/Mark as Paid buttons
   document.querySelectorAll(".btn-renew-member").forEach((btn) => {
@@ -1198,6 +1231,8 @@ const loadExpiringSoonModal = async () => {
       colorStyle = "color: var(--accent-purple);";
     }
 
+    const message = `Hi ${s.name}, this is a gentle reminder regarding your Taekwondo Academy membership. Your fee of ${currencySymbol}${s.feeAmount || 1000} is pending, and your membership ${isExpired ? "has expired" : "is expiring soon"} on ${formatLocalDate(s.expiryDate)}. Please pay at your earliest convenience.`;
+
     return `
       <tr>
         <td style="font-weight: 600;">${s.name}</td>
@@ -1205,17 +1240,38 @@ const loadExpiringSoonModal = async () => {
         <td style="${colorStyle} font-weight: 500; white-space: nowrap;">${formatLocalDate(s.expiryDate)}</td>
         <td><span style="${colorStyle} font-weight: 600; white-space: nowrap;">${dayText}</span></td>
         <td style="text-align: right;">
-          <button class="btn btn-primary btn-sm btn-extend-member" 
-            data-id="${s.id}" 
-            data-name="${s.name}" 
-            data-fee="${s.feeAmount || 1000}" 
-            data-months="${s.membershipMonths || 1}">
-            Extend
-          </button>
+          <div style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
+            <button class="btn btn-secondary btn-sm btn-whatsapp-reminder" data-mobile="${formatWhatsAppNumber(s.mobile)}" data-message="${encodeURIComponent(message)}" style="padding: 0.35rem 0.65rem;" title="Send WhatsApp Reminder">
+              <i data-lucide="message-circle" style="width:14px;height:14px;color:#25D366;"></i>
+            </button>
+            <button class="btn btn-primary btn-sm btn-extend-member" 
+              data-id="${s.id}" 
+              data-name="${s.name}" 
+              data-fee="${s.feeAmount || 1000}" 
+              data-months="${s.membershipMonths || 1}">
+              Extend
+            </button>
+          </div>
         </td>
       </tr>
     `;
   }).join("");
+
+  if (window.lucide) {
+    window.lucide.createIcons({ root: tbody });
+  }
+
+  // Bind WhatsApp confirmation
+  document.querySelectorAll(".btn-whatsapp-reminder").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      const mobile = e.currentTarget.getAttribute("data-mobile");
+      const text = decodeURIComponent(e.currentTarget.getAttribute("data-message"));
+      if (confirm(`Send WhatsApp reminder to this member?\n\nMessage:\n"${text}"`)) {
+        window.open(`https://wa.me/${mobile}?text=${encodeURIComponent(text)}`, "_blank");
+      }
+    };
+  });
 
   // Bind Extend buttons
   document.querySelectorAll(".btn-extend-member").forEach((btn) => {
@@ -1325,6 +1381,11 @@ const setupMobileSidebar = () => {
 const setupSettingsHandlers = () => {
   const settingsForm = document.getElementById("settings-form");
   const resetBtn = document.getElementById("btn-reset-database");
+  const currencySelect = document.getElementById("settings-currency");
+
+  if (currencySelect) {
+    currencySelect.value = currencySymbol;
+  }
 
   if (settingsForm) {
     settingsForm.addEventListener("submit", (e) => {
