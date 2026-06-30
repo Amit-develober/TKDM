@@ -84,9 +84,11 @@ const updateEnrollExpiry = () => {
 
 // Calculate number of days between two dates
 const getDaysDiff = (dateStrStart, dateStrEnd) => {
+  if (!dateStrStart || !dateStrEnd) return 999;
   // Strip time component to calculate absolute calendar days difference in UTC
   const start = new Date(dateStrStart.split("T")[0]);
   const end = new Date(dateStrEnd.split("T")[0]);
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) return 999;
   const diffTime = Math.abs(end - start);
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
@@ -303,7 +305,12 @@ const loadRouteData = async (route) => {
         await loadAttendance();
         break;
       case "enroll":
-        document.getElementById("enroll-date").value = getTodayDateString();
+        const todayStr = getTodayDateString();
+        const enrollDateEl = document.getElementById("enroll-date");
+        if (enrollDateEl) {
+          enrollDateEl.min = todayStr;
+          enrollDateEl.value = todayStr;
+        }
         updateEnrollExpiry();
         await loadEnrollDirectory();
         break;
@@ -358,11 +365,11 @@ const loadDashboard = async () => {
   document.getElementById("stat-today-attendance").innerText = presentCount;
 
   // 3. Pending Fee Count (expiryDate < today, exclude Out students)
-  const unpaidCount = students.filter((s) => !s.isOut && s.expiryDate < today).length;
+  const unpaidCount = students.filter((s) => !s.isOut && s.expiryDate && s.expiryDate < today).length;
   document.getElementById("stat-pending-fees").innerText = unpaidCount;
 
   // 3b. Expiring Soon Count (expiryDate < today || getDaysDiff(today, expiryDate) <= 7, exclude Out students)
-  const expiringSoonCount = students.filter((s) => !s.isOut && (s.expiryDate < today || getDaysDiff(today, s.expiryDate) <= 7)).length;
+  const expiringSoonCount = students.filter((s) => !s.isOut && s.expiryDate && (s.expiryDate < today || getDaysDiff(today, s.expiryDate) <= 7)).length;
   document.getElementById("stat-expiring-soon").innerText = expiringSoonCount;
 
   // 4. Financial computations (This month)
@@ -751,6 +758,11 @@ const setupFormHandlers = () => {
   const enrollDateInput = document.getElementById("enroll-date");
   const enrollMembershipInput = document.getElementById("enroll-membership");
   if (enrollDateInput) {
+    const todayStr = getTodayDateString();
+    enrollDateInput.min = todayStr;
+    if (!enrollDateInput.value) {
+      enrollDateInput.value = todayStr;
+    }
     enrollDateInput.addEventListener("change", updateEnrollExpiry);
   }
   if (enrollMembershipInput) {
@@ -761,7 +773,14 @@ const setupFormHandlers = () => {
   const enrollForm = document.getElementById("enroll-form");
   if (enrollForm) {
     enrollForm.addEventListener("reset", () => {
-      setTimeout(updateEnrollExpiry, 0);
+      setTimeout(() => {
+        const todayStr = getTodayDateString();
+        if (enrollDateInput) {
+          enrollDateInput.min = todayStr;
+          enrollDateInput.value = todayStr;
+        }
+        updateEnrollExpiry();
+      }, 0);
     });
 
     enrollForm.addEventListener("submit", async (e) => {
@@ -1116,7 +1135,7 @@ const loadPendingFeesModal = async () => {
   const today = getTodayDateString();
 
   // Filter expired students (exclude Out students)
-  const unpaidStudents = students.filter((s) => !s.isOut && s.expiryDate < today);
+  const unpaidStudents = students.filter((s) => !s.isOut && s.expiryDate && s.expiryDate < today);
 
   const tbody = document.getElementById("unpaid-members-list");
   if (unpaidStudents.length === 0) {
@@ -1206,7 +1225,7 @@ const loadExpiringSoonModal = async () => {
   const today = getTodayDateString();
 
   // Filter expiring soon & expired students (exclude Out students, expiryDate < today OR diff <= 7 days)
-  const expiringStudents = students.filter((s) => !s.isOut && (s.expiryDate < today || getDaysDiff(today, s.expiryDate) <= 7));
+  const expiringStudents = students.filter((s) => !s.isOut && s.expiryDate && (s.expiryDate < today || getDaysDiff(today, s.expiryDate) <= 7));
 
   const tbody = document.getElementById("expiring-members-list");
   if (expiringStudents.length === 0) {
