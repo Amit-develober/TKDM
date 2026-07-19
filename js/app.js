@@ -93,6 +93,383 @@ const getDaysDiff = (dateStrStart, dateStrEnd) => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
+// Generate printable Student Progress Report in a new window
+const generateStudentReport = (student, attendanceList, schoolName) => {
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    showToast("Please allow popups to download reports.", "warning");
+    return;
+  }
+
+  const today = getTodayDateString();
+  const isExpired = student.expiryDate < today;
+  const membershipStatus = student.isOut ? "Out" : (isExpired ? "Unpaid" : "Active");
+  const enrollmentDateStr = formatLocalDate(student.enrollmentDate);
+  const expiryDateStr = formatLocalDate(student.expiryDate);
+  const membershipDuration = `${student.membershipMonths} Month${student.membershipMonths > 1 ? "s" : ""}`;
+
+  // Calculate attendance details
+  const totalPresent = attendanceList.filter(a => a.status === "present").length;
+  const totalLogged = attendanceList.length;
+  const overallRate = totalLogged > 0 ? Math.round((totalPresent / totalLogged) * 100) : 0;
+  const overallAttendanceRate = `${totalPresent} / ${totalLogged} Days (${overallRate}%)`;
+
+  // Group attendance by month
+  const groups = {};
+  attendanceList.forEach(a => {
+    if (!a.date) return;
+    const [yearStr, monthStr] = a.date.split("-");
+    const year = parseInt(yearStr);
+    const month = parseInt(monthStr);
+    if (isNaN(year) || isNaN(month)) return;
+    const monthKey = `${year}-${monthStr}`;
+    if (!groups[monthKey]) {
+      groups[monthKey] = { present: 0, total: 0, year, month };
+    }
+    groups[monthKey].total++;
+    if (a.status === "present") {
+      groups[monthKey].present++;
+    }
+  });
+
+  // Find current month key
+  const todayObj = new Date();
+  const curYear = todayObj.getFullYear();
+  const curMonthStr = (todayObj.getMonth() + 1).toString().padStart(2, '0');
+  const curMonthKey = `${curYear}-${curMonthStr}`;
+
+  let currentMonthAttendance = "0 / 0 Days (0%)";
+  if (groups[curMonthKey]) {
+    const curMonthData = groups[curMonthKey];
+    const curPercent = curMonthData.total > 0 ? Math.round((curMonthData.present / curMonthData.total) * 100) : 0;
+    currentMonthAttendance = `${curMonthData.present} / ${curMonthData.total} Days (${curPercent}%)`;
+  }
+
+  // Create month list HTML
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const sortedKeys = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+  const monthlySummaryHtml = sortedKeys.length > 0 ? sortedKeys.map(key => {
+    const data = groups[key];
+    const percent = data.total > 0 ? Math.round((data.present / data.total) * 100) : 0;
+    const monthName = monthNames[data.month - 1];
+    return `
+      <div class="attendance-summary-item">
+        <span class="month-name">${monthName} ${data.year}</span>
+        <span class="month-stats">
+          ${data.present} / ${data.total} Days <span class="month-percentage">(${percent}%)</span>
+        </span>
+      </div>
+    `;
+  }).join("") : `<div style="text-align: center; padding: 1.5rem; color: var(--text-secondary); background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">No check-ins logged yet.</div>`;
+
+  const reportHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Progress Report - ${student.name}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --border-color: #e2e8f0;
+      --grid-bg: #f8fafc;
+      --accent-green: #10b981;
+      --accent-cyan: #0ea5e9;
+    }
+    body {
+      font-family: 'Outfit', sans-serif;
+      color: var(--text-primary);
+      background-color: var(--bg-color);
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-utility-banner {
+      position: sticky;
+      top: 0;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      font-size: 0.95rem;
+      z-index: 1000;
+    }
+    .print-utility-banner-title {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .print-utility-banner-btns {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .print-utility-banner button {
+      background: var(--accent-cyan);
+      color: #ffffff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      transition: background-color 0.2s;
+    }
+    .print-utility-banner button:hover {
+      background: #0284c7;
+    }
+    .print-utility-banner .btn-close {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #ffffff;
+    }
+    .print-utility-banner .btn-close:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .report-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+    .header-frame {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 1.5rem;
+    }
+    .header-frame h1 {
+      margin: 0 0 0.25rem 0;
+      font-size: 2.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #0f172a;
+    }
+    .header-frame .subtitle {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 600;
+    }
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #0f172a;
+      border-left: 4px solid var(--accent-cyan);
+      padding-left: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 2rem;
+    }
+    .grid-item {
+      background-color: var(--grid-bg);
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .grid-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .grid-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .attendance-summary-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    .attendance-summary-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1.25rem;
+      background: var(--grid-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+    .month-name {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .month-stats {
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .month-percentage {
+      font-weight: 700;
+      color: var(--accent-green);
+      margin-left: 0.5rem;
+    }
+    .footer-signature {
+      margin-top: 3.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-top: 1.5rem;
+    }
+    .signature-block {
+      text-align: center;
+      width: 220px;
+    }
+    .signature-line {
+      border-bottom: 1px solid #94a3b8;
+      height: 40px;
+      margin-bottom: 0.5rem;
+    }
+    .signature-title {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .elegant-footer {
+      margin-top: 3.5rem;
+      text-align: center;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    
+    @media print {
+      .print-utility-banner {
+        display: none !important;
+      }
+      body {
+        background: transparent;
+      }
+      .report-container {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="print-utility-banner">
+    <div class="print-utility-banner-title">
+      <span>🥋 Student Progress Report: <strong>${student.name}</strong></span>
+    </div>
+    <div class="print-utility-banner-btns">
+      <button onclick="window.print()">Print / Save PDF</button>
+      <button class="btn-close" onclick="window.close()">Close Window</button>
+    </div>
+  </div>
+  
+  <div class="report-container">
+    <div class="header-frame">
+      <h1>${schoolName}</h1>
+      <div class="subtitle">powered by Taekwondo Management</div>
+    </div>
+    
+    <div class="section-title">Student Profile</div>
+    <div class="profile-grid">
+      <div class="grid-item">
+        <span class="grid-label">Student Name</span>
+        <span class="grid-value">${student.name}</span>
+      </div>
+      <div class="grid-item">
+        <span class="grid-label">Mobile Number</span>
+        <span class="grid-value">${student.mobile}</span>
+      </div>
+      <div class="grid-item">
+        <span class="grid-label">Enrollment Date</span>
+        <span class="grid-value">${enrollmentDateStr}</span>
+      </div>
+      <div class="grid-item">
+        <span class="grid-label">Membership Duration</span>
+        <span class="grid-value">${membershipDuration}</span>
+      </div>
+      <div class="grid-item">
+        <span class="grid-label">Expiry Date</span>
+        <span class="grid-value">${expiryDateStr}</span>
+      </div>
+      <div class="grid-item">
+        <span class="grid-label">Monthly Attendance (Current Month)</span>
+        <span class="grid-value">${currentMonthAttendance}</span>
+      </div>
+      <div class="grid-item">
+        <span class="grid-label">Overall Attendance Rate</span>
+        <span class="grid-value">${overallAttendanceRate}</span>
+      </div>
+      <div class="grid-item">
+        <span class="grid-label">Membership Status</span>
+        <span class="grid-value">${membershipStatus}</span>
+      </div>
+    </div>
+    
+    <div class="section-title">Monthly Attendance Summary</div>
+    <div class="attendance-summary-list">
+      ${monthlySummaryHtml}
+    </div>
+    
+    <div class="footer-signature">
+      <div class="signature-block">
+        <div class="signature-line"></div>
+        <div class="signature-title">Parent/Guardian Signature</div>
+      </div>
+      <div class="signature-block">
+        <div class="signature-line"></div>
+        <div class="signature-title">Instructor Signature</div>
+      </div>
+    </div>
+    
+    <div class="elegant-footer">
+      Generated by ${schoolName}
+    </div>
+  </div>
+  
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    };
+  </script>
+</body>
+</html>
+  `;
+
+  printWindow.document.write(reportHtml);
+  printWindow.document.close();
+};
+
 // Toast notification module
 const showToast = (message, type = "success") => {
   // Remove existing toasts first to prevent stacking issues
@@ -260,7 +637,26 @@ const setupNavigation = () => {
   window.addEventListener("hashchange", handleRouting);
 };
 
-const handleRouting = () => {
+const handleRouting = async () => {
+  const user = authAPI.getCurrentUser();
+  if (user) {
+    try {
+      const profile = await dbAPI.getGymProfile();
+      if (!profile) {
+        const onboardingModal = document.getElementById("onboarding-modal");
+        if (onboardingModal) {
+          onboardingModal.classList.add("active");
+        }
+        if (window.location.hash !== "#dashboard" && window.location.hash !== "") {
+          window.location.hash = "#dashboard";
+          return;
+        }
+      }
+    } catch (err) {
+      console.error("Routing guard error:", err);
+    }
+  }
+
   const hash = window.location.hash.replace("#", "") || "dashboard";
   currentRoute = hash;
 
@@ -368,8 +764,8 @@ const loadDashboard = async () => {
   const unpaidCount = students.filter((s) => !s.isOut && s.expiryDate && s.expiryDate < today).length;
   document.getElementById("stat-pending-fees").innerText = unpaidCount;
 
-  // 3b. Expiring Soon Count (expiryDate < today || getDaysDiff(today, expiryDate) <= 7, exclude Out students)
-  const expiringSoonCount = students.filter((s) => !s.isOut && s.expiryDate && (s.expiryDate < today || getDaysDiff(today, s.expiryDate) <= 7)).length;
+  // 3b. Expiring Soon Count (expiryDate < today || getDaysDiff(today, expiryDate) <= 7, exclude Out & Unpaid registered students)
+  const expiringSoonCount = students.filter((s) => !s.isOut && s.paymentStatus !== "Unpaid" && s.expiryDate && (s.expiryDate < today || getDaysDiff(today, s.expiryDate) <= 7)).length;
   document.getElementById("stat-expiring-soon").innerText = expiringSoonCount;
 
   // 4. Financial computations (This month)
@@ -652,6 +1048,20 @@ const loadEnrollDirectory = async () => {
         `;
       }
 
+      // Download Report Button
+      const downloadReportBtn = `
+        <button class="btn btn-secondary btn-download-report" data-id="${s.id}" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" title="Download Report">
+          <i data-lucide="file-text" style="width: 14px; height: 14px; vertical-align: middle;"></i>
+        </button>
+      `;
+
+      const actionHtml = `
+        <div style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
+          ${downloadReportBtn}
+          ${actionBtn}
+        </div>
+      `;
+
       // Belt Selector
       const beltVal = s.belt || "White Belt";
       const beltOptions = [
@@ -693,7 +1103,7 @@ const loadEnrollDirectory = async () => {
           <td>${attendanceRateText}</td>
           <td>${paymentBadge}</td>
           <td>${statusBadge}</td>
-          <td style="text-align: right;">${actionBtn}</td>
+          <td style="text-align: right;">${actionHtml}</td>
         </tr>
       `;
     }).join("");
@@ -722,6 +1132,26 @@ const loadEnrollDirectory = async () => {
       };
     });
 
+    // Bind Print/Download Report Buttons
+    tbody.querySelectorAll(".btn-download-report").forEach((btn) => {
+      btn.onclick = async (e) => {
+        const studentId = e.currentTarget.getAttribute("data-id");
+        const student = students.find((stud) => stud.id === studentId);
+        if (!student) return;
+        
+        try {
+          const profile = await dbAPI.getGymProfile();
+          const schoolName = (profile && profile.gymName) || "Taekwondo Academy";
+          const studentAttendance = allAttendance.filter((a) => a.studentId === studentId);
+          
+          generateStudentReport(student, studentAttendance, schoolName);
+        } catch (err) {
+          console.error(err);
+          showToast("Failed to generate student report.", "danger");
+        }
+      };
+    });
+
     // Bind Belt Rank dropdown update
     tbody.querySelectorAll(".belt-update-select").forEach((select) => {
       select.onchange = async (e) => {
@@ -742,6 +1172,11 @@ const loadEnrollDirectory = async () => {
         }
       };
     });
+
+    // Initialize Lucide icons for the dynamic content
+    if (window.lucide) {
+      window.lucide.createIcons({ root: tbody });
+    }
   };
 
   // Bind live search & filter events with debounce
@@ -818,7 +1253,7 @@ const setupFormHandlers = () => {
           expiryDate,
           feeAmount: feeCollected,
           paymentStatus: resolvedPaymentStatus,
-          belt: document.getElementById("enroll-belt").value || "White"
+          belt: document.getElementById("enroll-belt").value || "White Belt"
         });
 
         // 2. Add payment record only if Paid and fee is greater than 0
@@ -995,7 +1430,9 @@ const setupModalHandlers = () => {
     const renewMonths = document.getElementById("renew-months").value;
     const amountCollected = parseFloat(document.getElementById("renew-amount").value) || 0;
 
-    const newExpiryDate = calcExpiryDate(paymentDate, renewMonths);
+    const currentExpiry = document.getElementById("renew-student-id").getAttribute("data-expiry") || paymentDate;
+    const baseDate = new Date(`${currentExpiry}T00:00:00`) > new Date(`${paymentDate}T00:00:00`) ? currentExpiry : paymentDate;
+    const newExpiryDate = calcExpiryDate(baseDate, renewMonths);
 
     try {
       // 1. Update Student record in DB
@@ -1162,7 +1599,8 @@ const loadPendingFeesModal = async () => {
               data-id="${s.id}" 
               data-name="${s.name}" 
               data-fee="${s.feeAmount || 1000}" 
-              data-months="${s.membershipMonths || 1}">
+              data-months="${s.membershipMonths || 1}"
+              data-expiry="${s.expiryDate}">
               Mark Paid
             </button>
           </div>
@@ -1194,10 +1632,13 @@ const loadPendingFeesModal = async () => {
       const studentName = e.currentTarget.getAttribute("data-name");
       const baseFee = e.currentTarget.getAttribute("data-fee");
       const baseMonths = e.currentTarget.getAttribute("data-months") || 1;
+      const expiryDate = e.currentTarget.getAttribute("data-expiry");
 
       // Open drawer & populate fields
       const renewalDrawer = document.getElementById("renewal-drawer");
-      document.getElementById("renew-student-id").value = studentId;
+      const idEl = document.getElementById("renew-student-id");
+      idEl.value = studentId;
+      idEl.setAttribute("data-expiry", expiryDate);
       const nameEl = document.getElementById("renew-student-name");
       nameEl.innerText = studentName;
       nameEl.setAttribute("data-name", studentName);
@@ -1224,8 +1665,8 @@ const loadExpiringSoonModal = async () => {
   const students = await dbAPI.getStudents();
   const today = getTodayDateString();
 
-  // Filter expiring soon & expired students (exclude Out students, expiryDate < today OR diff <= 7 days)
-  const expiringStudents = students.filter((s) => !s.isOut && s.expiryDate && (s.expiryDate < today || getDaysDiff(today, s.expiryDate) <= 7));
+  // Filter expiring soon & expired students (exclude Out & Unpaid registered students, expiryDate < today OR diff <= 7 days)
+  const expiringStudents = students.filter((s) => !s.isOut && s.paymentStatus !== "Unpaid" && s.expiryDate && (s.expiryDate < today || getDaysDiff(today, s.expiryDate) <= 7));
 
   const tbody = document.getElementById("expiring-members-list");
   if (expiringStudents.length === 0) {

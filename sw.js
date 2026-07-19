@@ -48,6 +48,8 @@ self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
 
   const url = e.request.url;
+  // Bypass unsupported schemes (like chrome-extension://, data:, etc.)
+  if (!url.startsWith("http://") && !url.startsWith("https://")) return;
 
   // Bypass Firebase backend requests (Auth, Firestore, Analytics, etc.)
   // but ALLOW Google Fonts (fonts.googleapis.com / fonts.gstatic.com) to be cached
